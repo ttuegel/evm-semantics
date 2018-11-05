@@ -102,6 +102,7 @@ ocaml-deps: .build/local/lib/pkgconfig/libsecp256k1.pc
 		&& make install
 
 K_BIN=$(K_SUBMODULE)/k-distribution/target/release/k/bin
+KOMPILE ?= $(K_BIN)/kompile
 
 # Building
 # --------
@@ -151,12 +152,12 @@ defn: $(defn_files)
 
 .build/java/driver-kompiled/timestamp: $(java_files)
 	@echo "== kompile: $@"
-	$(K_BIN)/kompile --debug --main-module ETHEREUM-SIMULATION --backend java \
+	$(KOMPILE) --debug --main-module ETHEREUM-SIMULATION --backend java \
 					--syntax-module ETHEREUM-SIMULATION $< --directory .build/java -I .build/java
 
 .build/haskell/driver.kore: $(haskell_files)
 	@echo "== kompile: $@"
-	$(K_BIN)/kompile --debug --main-module ETHEREUM-SIMULATION --backend kore \
+	$(KOMPILE) --debug --main-module ETHEREUM-SIMULATION --backend kore \
 					--syntax-module ETHEREUM-SIMULATION $< --directory .build/haskell -I .build/haskell
 
 # OCAML Backend
@@ -177,16 +178,16 @@ endif
 
 .build/llvm/driver-kompiled/interpreter: $(ocaml_files)
 	@echo "== kompile: $@"
-		&& ${K_BIN}/kompile --debug --main-module ETHEREUM-SIMULATION \
 	eval $$($(OPAM) config env) \
+		&& $(KOMPILE) --debug --main-module ETHEREUM-SIMULATION \
 						    --syntax-module ETHEREUM-SIMULATION .build/ocaml/driver.k --directory .build/llvm \
 						    --backend llvm -ccopt ${PLUGIN_SUBMODULE}/plugin-c/crypto.cpp \
 						    -ccopt -lff -ccopt -lcryptopp -ccopt -lsecp256k1 -ccopt -lprocps -ccopt -g -ccopt -std=c++11 ${KOMPILE_FLAGS}
 
 .build/%/driver-kompiled/constants.$(EXT): $(ocaml_files) $(node_files)
 	@echo "== kompile: $@"
-		&& ${K_BIN}/kompile --debug --main-module ETHEREUM-SIMULATION \
 	eval $$($(OPAM) config env) \
+		&& $(KOMPILE) --debug --main-module ETHEREUM-SIMULATION \
 						    --syntax-module ETHEREUM-SIMULATION .build/$*/driver.k --directory .build/$* \
 						    --hook-namespaces "KRYPTO BLOCKCHAIN" --gen-ml-only -O3 --non-strict \
 		&& cd .build/$*/driver-kompiled \
