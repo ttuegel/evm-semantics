@@ -21,6 +21,8 @@ export LUA_PATH
 KORE_SUBMODULE:=$(BUILD_DIR)/kore
 KORE_SUBMODULE_SRC:=$(KORE_SUBMODULE)/src/main/haskell/kore
 
+OPAM ?= opam
+
 .PHONY: all clean deps repo-deps system-deps k-deps tangle-deps ocaml-deps plugin-deps kore-deps \
 		build build-ocaml build-java build-node build-kore defn split-tests \
 		test test-all test-concrete test-all-concrete test-conformance test-slow-conformance test-all-conformance \
@@ -38,8 +40,8 @@ clean-submodules:
 	rm -rf .build/k/make.timestamp .build/pandoc-tangle/make.timestamp tests/ethereum-tests/make.timestamp tests/proofs/make.timestamp plugin/make.timestamp kore/make.timestamp .build/media/metropolis/*.sty
 
 distclean: clean
-	opam switch system
-	opam switch remove 4.03.0+k --yes || true
+	$(OPAM) switch system
+	$(OPAM) switch remove 4.03.0+k --yes || true
 	cd $(K_SUBMODULE) \
 		&& mvn clean -q
 	git submodule deinit --force -- ./
@@ -81,13 +83,13 @@ $(KORE_SUBMODULE)/make.timestamp:
 	touch $(KORE_SUBMODULE)/make.timestamp
 
 ocaml-deps: .build/local/lib/pkgconfig/libsecp256k1.pc
-	opam init --quiet --no-setup
-	opam repository add k "$(K_SUBMODULE)/k-distribution/target/release/k/lib/opam" \
-		|| opam repository set-url k "$(K_SUBMODULE)/k-distribution/target/release/k/lib/opam"
-	opam update
-	opam switch 4.06.1+k
-	eval $$(opam config env) \
-		opam install --yes mlgmp zarith uuidm cryptokit secp256k1.0.3.2 bn128 ocaml-protoc rlp yojson hex ocp-ocamlres
+	$(OPAM) init --quiet --no-setup
+	$(OPAM) repository add k "$(K_SUBMODULE)/k-distribution/target/release/k/lib/opam" \
+		|| $(OPAM) repository set-url k "$(K_SUBMODULE)/k-distribution/target/release/k/lib/opam"
+	$(OPAM) update
+	$(OPAM) switch 4.06.1+k
+	eval $$($(OPAM) config env) \
+		$(OPAM) install --yes mlgmp zarith uuidm cryptokit secp256k1.0.3.2 bn128 ocaml-protoc rlp yojson hex ocp-ocamlres
 
 # install secp256k1 from bitcoin-core
 .build/local/lib/pkgconfig/libsecp256k1.pc:
@@ -175,16 +177,16 @@ endif
 
 .build/llvm/driver-kompiled/interpreter: $(ocaml_files)
 	@echo "== kompile: $@"
-	eval $$(opam config env) \
 		&& ${K_BIN}/kompile --debug --main-module ETHEREUM-SIMULATION \
+	eval $$($(OPAM) config env) \
 						    --syntax-module ETHEREUM-SIMULATION .build/ocaml/driver.k --directory .build/llvm \
 						    --backend llvm -ccopt ${PLUGIN_SUBMODULE}/plugin-c/crypto.cpp \
 						    -ccopt -lff -ccopt -lcryptopp -ccopt -lsecp256k1 -ccopt -lprocps -ccopt -g -ccopt -std=c++11 ${KOMPILE_FLAGS}
 
 .build/%/driver-kompiled/constants.$(EXT): $(ocaml_files) $(node_files)
 	@echo "== kompile: $@"
-	eval $$(opam config env) \
 		&& ${K_BIN}/kompile --debug --main-module ETHEREUM-SIMULATION \
+	eval $$($(OPAM) config env) \
 						    --syntax-module ETHEREUM-SIMULATION .build/$*/driver.k --directory .build/$* \
 						    --hook-namespaces "KRYPTO BLOCKCHAIN" --gen-ml-only -O3 --non-strict \
 		&& cd .build/$*/driver-kompiled \
@@ -193,7 +195,7 @@ endif
 .build/plugin-%/semantics.$(LIBEXT): $(wildcard plugin/plugin/*.ml plugin/plugin/*.mli) .build/%/driver-kompiled/constants.$(EXT)
 	mkdir -p .build/plugin-$*
 	cp plugin/plugin/*.ml plugin/plugin/*.mli .build/plugin-$*
-	eval $$(opam config env) \
+	eval $$($(OPAM) config env) \
 		&& ocp-ocamlres -format ocaml plugin/plugin/proto/VERSION -o .build/plugin-$*/apiVersion.ml \
 		&& ocaml-protoc plugin/plugin/proto/*.proto -ml_out .build/plugin-$* \
 		&& cd .build/plugin-$* \
@@ -204,7 +206,7 @@ endif
 			&& ocamlfind install ethereum-semantics-plugin-$* ../../plugin/plugin/META semantics.* *.cmi *.$(EXT)
 
 .build/%/driver-kompiled/interpreter: .build/plugin-%/semantics.$(LIBEXT)
-	eval $$(opam config env) \
+	eval $$($(OPAM) config env) \
 		&& cd .build/$*/driver-kompiled \
 			&& ocamllex lexer.mll \
 			&& ocamlyacc parser.mly \
@@ -217,7 +219,7 @@ endif
 .build/vm/kevm-vm: $(wildcard plugin/vm/*.ml plugin/vm/*.mli) .build/node/driver-kompiled/interpreter
 	mkdir -p .build/vm
 	cp plugin/vm/*.ml plugin/vm/*.mli .build/vm
-	eval $$(opam config env) \
+	eval $$($(OPAM) config env) \
 		&& cd .build/vm \
 			&& ocamlfind $(OCAMLC) -g -I ../node/driver-kompiled -o kevm-vm constants.$(EXT) prelude.$(EXT) plugin.$(EXT) parser.$(EXT) lexer.$(EXT) realdef.$(EXT) run.$(EXT) VM.mli VM.ml vmNetworkServer.ml \
 								   -package gmp -package dynlink -package zarith -package str -package uuidm -package unix -package ethereum-semantics-plugin-node -package rlp -package yojson -package hex -linkpkg -linkall -thread -safe-string
