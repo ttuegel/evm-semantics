@@ -100,7 +100,7 @@ ocaml-deps: .build/local/lib/pkgconfig/libsecp256k1.pc
 	    && make -s -j4 \
 	    && make install
 
-K_BIN=$(K_SUBMODULE)/k-distribution/target/release/k/bin
+K_BIN ?= $(K_SUBMODULE)/k-distribution/target/release/k
 
 # Building
 # --------
@@ -155,14 +155,14 @@ haskell-defn: $(haskell_files)
 
 .build/java/driver-kompiled/timestamp: $(java_files)
 	@echo "== kompile: $@"
-	$(K_BIN)/kompile --debug --main-module ETHEREUM-SIMULATION --backend java \
+	$(K_BIN)/bin/kompile --debug --main-module ETHEREUM-SIMULATION --backend java \
 	                 --syntax-module ETHEREUM-SIMULATION $< --directory .build/java -I .build/java
 
 # Haskell Backend
 
 .build/haskell/driver-kompiled/definition.kore: $(haskell_files)
 	@echo "== kompile: $@"
-	$(K_BIN)/kompile --debug --main-module ETHEREUM-SIMULATION --backend haskell \
+	$(K_BIN)/bin/kompile --debug --main-module ETHEREUM-SIMULATION --backend haskell \
 	                 --syntax-module ETHEREUM-SIMULATION $< --directory .build/haskell -I .build/haskell
 
 # OCAML Backend
@@ -184,7 +184,7 @@ endif
 .build/llvm/driver-kompiled/interpreter: $(ocaml_files)
 	@echo "== kompile: $@"
 	eval $$(opam config env) \
-	    && ${K_BIN}/kompile --debug --main-module ETHEREUM-SIMULATION \
+	    && $(K_BIN)/bin/kompile --debug --main-module ETHEREUM-SIMULATION \
 	                        --syntax-module ETHEREUM-SIMULATION .build/ocaml/driver.k --directory .build/llvm \
 	                        --backend llvm -ccopt ${PLUGIN_SUBMODULE}/plugin-c/crypto.cpp \
 	                        -ccopt -lff -ccopt -lcryptopp -ccopt -lsecp256k1 -ccopt -lprocps -ccopt -g -ccopt -std=c++11 -ccopt -O2
@@ -192,7 +192,7 @@ endif
 .build/%/driver-kompiled/constants.$(EXT): $(ocaml_files) $(node_files)
 	@echo "== kompile: $@"
 	eval $$(opam config env) \
-	    && ${K_BIN}/kompile --debug --main-module ETHEREUM-SIMULATION \
+	    && $(K_BIN)/bin/kompile --debug --main-module ETHEREUM-SIMULATION \
 	                        --syntax-module ETHEREUM-SIMULATION .build/$*/driver.k --directory .build/$* \
 	                        --hook-namespaces "KRYPTO BLOCKCHAIN" --gen-ml-only -O3 --non-strict \
 	    && cd .build/$*/driver-kompiled \
