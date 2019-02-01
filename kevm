@@ -41,7 +41,7 @@ run_env() {
     local lib_dir="$build_dir/local/lib"
     export cMODE="\`${MODE:-NORMAL}\`(.KList)"
     export cSCHEDULE="\`${SCHEDULE:-BYZANTIUM}_EVM\`(.KList)"
-    export PATH="$release_dir/lib/native/linux:$release_dir/lib/native/linux64:$release_dir/bin/:$PATH"
+    export PATH="$release_dir/lib/native/linux:$release_dir/lib/native/linux64:$build_dir/kore/bin:$release_dir/bin/:$PATH"
     export LD_LIBRARY_PATH="$release_dir/lib/native/linux64:$lib_dir:${LD_LIBRARY_PATH:-}"
     eval $(opam config env)
 }
@@ -57,8 +57,8 @@ run_krun() {
     run_env "$run_file"
     export K_OPTS=-Xss500m
     case "$backend" in
-        haskell)      args=(--haskell-backend-command "$build_dir/kore/bin/kore-exec")                                   ;;
-        haskell-perf) args=(--haskell-backend-command "$build_dir/kore/bin/kore-exec +RTS -p -h -RTS") ; backend=haskell ;;
+        haskell)      args=(--haskell-backend-command "kore-exec")                                   ;;
+        haskell-perf) args=(--haskell-backend-command "kore-exec +RTS -p -h -RTS") ; backend=haskell ;;
         ocaml)        args=(--interpret)                                                                                 ;;
         *)            args=()                                                                                            ;;
     esac
