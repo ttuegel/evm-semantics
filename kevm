@@ -30,12 +30,14 @@ pretty_diff() {
     git --no-pager diff --no-index "$@"
 }
 
+K_DIST="${K_DIST:-$build_dir/k/k-distribution/target/release/k}"
+release_dir="${K_BIN:-$K_DIST}"  # For users who still set K_BIN
+
 # Environment Setup
 # -----------------
 
 run_env() {
     local run_file=$1
-    local release_dir="${K_BIN:-$build_dir/k/k-distribution/target/release/k}"
     local lib_dir="$build_dir/local/lib"
     export cMODE="\`${MODE:-NORMAL}\`(.KList)"
     export cSCHEDULE="\`${SCHEDULE:-BYZANTIUM}_EVM\`(.KList)"
