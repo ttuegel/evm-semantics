@@ -30,6 +30,7 @@ pretty_diff() {
     git --no-pager diff --no-index "$@"
 }
 
+OPAM="${OPAM:-opam}"
 K_DIST="${K_DIST:-$build_dir/k/k-distribution/target/release/k}"
 release_dir="${K_BIN:-$K_DIST}"  # For users who still set K_BIN
 
@@ -43,7 +44,7 @@ run_env() {
     export cSCHEDULE="\`${SCHEDULE:-BYZANTIUM}_EVM\`(.KList)"
     export PATH="$release_dir/lib/native/linux:$release_dir/lib/native/linux64:$build_dir/kore/bin:$release_dir/bin/:$PATH"
     export LD_LIBRARY_PATH="$release_dir/lib/native/linux64:$lib_dir:${LD_LIBRARY_PATH:-}"
-    eval $(opam config env)
+    eval $($OPAM config env)
 }
 
 # Runners
