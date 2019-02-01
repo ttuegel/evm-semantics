@@ -9,6 +9,8 @@ export LIBRARY_PATH
 export PKG_CONFIG_PATH
 
 K_SUBMODULE:=$(BUILD_DIR)/k
+K_DIST ?= $(K_SUBMODULE)/k-distribution/target/release/k
+K_BIN = $(K_DIST)/bin
 PLUGIN_SUBMODULE:=$(abspath plugin)
 
 # need relative path for `pandoc` on MacOS
@@ -94,8 +96,6 @@ ocaml-deps: .build/local/lib/pkgconfig/libsecp256k1.pc
 	    && ./configure --enable-module-recovery --prefix="$(BUILD_LOCAL)" \
 	    && make -s -j4 \
 	    && make install
-
-K_BIN=$(K_SUBMODULE)/k-distribution/target/release/k/bin
 
 # Building
 # --------
