@@ -177,8 +177,8 @@ where `F1 : F2 : F3 : F4` is the (two's complement) byte-array representation of
 
     //Byte array buffer. Lemmas defined in evm-data-symbolic.k
     // SIZE, DATA // left zero padding
-    syntax ByteArray ::= #buf ( Int , Int ) [function, smtlib(buf)]
- // ---------------------------------------------------------------
+    syntax ByteArray ::= #buf ( Int , Int ) [function, functional, smtlib(buf)]
+ // ---------------------------------------------------------------------------
 
     syntax Int ::= #getValue ( TypedArg ) [function]
  // ------------------------------------------------
