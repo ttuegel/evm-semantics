@@ -526,7 +526,7 @@ The local memory of execution is a byte-array (instead of a word-array).
 
     syntax Int ::= #asWord ( ByteArray ) [function, smtlib(asWord)]
  // ---------------------------------------------------------------
-    rule #asWord(WS) => chop(Bytes2Int(WS, BE, Unsigned))
+    rule [#asWord]: #asWord(WS) => chop(Bytes2Int(WS, BE, Unsigned))
 
     syntax Int ::= #asInteger ( ByteArray ) [function]
  // --------------------------------------------------
@@ -551,8 +551,8 @@ The local memory of execution is a byte-array (instead of a word-array).
 
     syntax ByteArray ::= ByteArray "[" Int ".." Int "]" [function]
  // --------------------------------------------------------------
-    rule WS [ START .. WIDTH ] => substrBytes(padRightBytes(WS, START +Int WIDTH, 0), START, START +Int WIDTH) requires START <Int #sizeByteArray(WS)
-    rule WS [ START .. WIDTH ] => padRightBytes(.Bytes, WIDTH, 0)                                              [owise]
+    rule [bytes-range]:       WS [ START .. WIDTH ] => substrBytes(padRightBytes(WS, START +Int WIDTH, 0), START, START +Int WIDTH) requires START <Int #sizeByteArray(WS)
+    rule [bytes-range.owise]: WS [ START .. WIDTH ] => padRightBytes(.Bytes, WIDTH, 0)                                              [owise]
 
     syntax Int ::= #sizeByteArray ( ByteArray ) [function, functional]
  // ------------------------------------------------------------------
